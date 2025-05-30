@@ -40,7 +40,7 @@ def binary_search(word, dictionary):
     return
 
 print("検索するアナグラムの個数を教えてください") 
-N = input(int())
+N = int(input())
 
 with open('words.txt', 'r', encoding='utf-8') as f:
     dictionary = [line.strip() for line in f if line.strip()]
