@@ -42,7 +42,7 @@ def binary_search(word, dictionary):
 print("検索するアナグラムの個数を教えてください") 
 N = input(int())
 
-with open('anagram/words.txt', 'r', encoding='utf-8') as f:
+with open('words.txt', 'r', encoding='utf-8') as f:
     dictionary = [line.strip() for line in f if line.strip()]
 
 new_dictionary = generate_new_dictionary(dictionary)
