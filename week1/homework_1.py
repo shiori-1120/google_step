@@ -40,18 +40,22 @@ def binary_search(word, dictionary):
     return
 
 print("検索するアナグラムの個数を教えてください") 
-N = int(input())
+try:
+    n = int(input())
+    with open('words.txt', 'r', encoding='utf-8') as f:
+        dictionary = [line.strip() for line in f if line.strip()]
 
-with open('words.txt', 'r', encoding='utf-8') as f:
-    dictionary = [line.strip() for line in f if line.strip()]
+    new_dictionary = generate_new_dictionary(dictionary)
 
-new_dictionary = generate_new_dictionary(dictionary)
+    for i in range(n):
+        word = input()
 
-for i in range(N):
-    word = input()
-
-    if type(word) == str:
-        anagram = search_anagram(word, new_dictionary)
-        print(anagram)
-        
-    else: print("error")
+        if type(word) == str:
+            anagram = search_anagram(word, new_dictionary)
+            print(anagram)
+            
+        else: print("文字列を入力してください")
+    
+except TypeError:
+    print("半角数字を入力してください")
+    
