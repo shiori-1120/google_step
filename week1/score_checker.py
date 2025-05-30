@@ -48,13 +48,13 @@ def main(data_file, answer_file):
     answer_words = read_words(answer_file)
     if len(data_words) != len(answer_words):
         print("The number of words in %s and %s doesn't match." %
-              (data_file, answer_file))
+            (data_file, answer_file))
         exit(1)
     score = 0
     for i in range(len(data_words)):
         if not is_anagram(answer_words[i], data_words[i]):
             print("'%s' is not an anagram of '%s'." %
-                  (answer_words[i], data_words[i]))
+                (answer_words[i], data_words[i]))
             exit(1)
         if answer_words[i] not in valid_words:
             print("'%s' is not a valid word!" % answer_words[i])
