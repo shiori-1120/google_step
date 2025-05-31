@@ -5,15 +5,15 @@ def search_anagram(random_word, new_dictionary):
     
     return anagram
 
-def generate_new_dictionary(dictionary):
+def generate_new_dictionary(dictionary):# dictionary をhash_tableにする
     new_dictionary = []
     for word in dictionary:
         new_dictionary.append((''.join(sorted(word)), word))
     sorted_new_dictionary = sorted(new_dictionary, key=lambda x: x[0])
     
     return sorted_new_dictionary
-        
-def binary_search(word, dictionary):
+
+def binary_search(word, dictionary):# unit test
     left = 0
     right = len(dictionary) - 1
     
@@ -29,16 +29,18 @@ def binary_search(word, dictionary):
             searched_word_list.append(dictionary[mid][1])
             i = 1
             j = 1
-            while dictionary[mid + i][0] == word:
+            while dictionary[mid + i][0] == word:# 関数にしてもいいかも
                 searched_word_list.append(dictionary[mid + i][1])
                 i += 1
             while dictionary[mid - j][0] == word:
                 searched_word_list.append(dictionary[mid - j][1])
                 j += 1
             return searched_word_list
-        
+    
     return
 
+# main()関数を作って最後に実行
+# if __name__ == __main__
 print("検索するアナグラムの個数を教えてください") 
 try:
     n = int(input())

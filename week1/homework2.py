@@ -3,7 +3,7 @@ def upgrade_search_anagram(random_word, new_dictionary):
     for word_item in random_word:
         ramdom_word_hashmap_list.append(make_alphabet_hashmap(word_item))
 
-    final_anagram_lists = [] 
+    final_anagram_lists = []
 
     for hash_table in ramdom_word_hashmap_list:
         max_score = 0
@@ -35,7 +35,6 @@ def get_word_score(word_hash_table):
         score += count * scores_list[char_index]
     return score
 
-
 def make_alphabet_hashmap(word):
     hash_table = {}
     for char in word:
@@ -51,7 +50,7 @@ with open('words.txt', 'r', encoding='utf-8') as f:
 new_dictionary = []
 for word in dictionary:
     new_dictionary.append([make_alphabet_hashmap(word), word])
-    
+
 with open('large.txt', 'r', encoding='utf-8') as f:
     word = [line.strip() for line in f if line.strip()]
 
