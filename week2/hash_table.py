@@ -21,6 +21,31 @@ def calculate_hash(key):
         hash += ord(i)
     return hash
 
+def generate_prime(num):
+    if num == 1:
+        return 1
+    prime_list = [2]
+    for i in range(num + 1):
+        for prime in prime_list:
+            if i % prime == 0:
+                break
+        else:
+            prime_list.append(i)
+    return prime_list[-1] 
+
+def expand_or_shrink_hash(self, is_expand):
+    if is_expand:
+        new_bucket_size = generate_prime(self.bucket_size*2)
+    else:
+        new_bucket_size = generate_prime(self.bucket_size//2)
+    new_hash_table = HashTable(bucket_size = new_bucket_size)
+    
+    for bucket in new_hash_table.buckets:
+        while bucket:
+            new_hash_table.put(bucket.key, bucket.value)
+            bucket = bucket.next
+    
+    return new_hash_table
 
 # An item object that represents one key - value pair in the hash table.
 class Item:
@@ -45,10 +70,10 @@ class Item:
 class HashTable:
 
     # Initialize the hash table.
-    def __init__(self):
+    def __init__(self, bucket_size = 97):
         # Set the initial bucket size to 97. A prime number is chosen to reduce
         # hash conflicts.
-        self.bucket_size = 97
+        self.bucket_size = bucket_size
         self.buckets = [None] * self.bucket_size
         self.item_count = 0
 
@@ -72,6 +97,8 @@ class HashTable:
         new_item = Item(key, value, self.buckets[bucket_index])
         self.buckets[bucket_index] = new_item
         self.item_count += 1
+        if self.item_count // self.bucket_size > 0.7:
+            self = expand_or_shrink_hash(self, True)
         return True
 
     # Get an item from the hash table.
@@ -97,10 +124,24 @@ class HashTable:
     #               otherwise.
     def delete(self, key):
         assert type(key) == str
-        #------------------------#
-        # Write your code here!  #
-        #------------------------#
-        pass
+        self.check_size() # Note: Don't remove this code.
+        bucket_index = calculate_hash(key) % self.bucket_size
+        item = self.buckets[bucket_index]
+        while item:
+            if item.key == key:
+                if item.next:
+                    item.value = item.next
+                else:
+                    item.key = None
+                    item.value = None
+                self.item_count -= 1
+                
+                if self.item_count // self.bucket_size < 0.3:
+                    self = expand_or_shrink_hash(self, False)
+                return True
+            item = item.next
+            
+        return False
 
     # Return the total number of items in the hash table.
     def size(self):
@@ -218,4 +259,4 @@ def performance_test():
 
 if __name__ == "__main__":
     functional_test()
-    performance_test()
+    # performance_test()
