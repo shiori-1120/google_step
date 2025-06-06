@@ -1,4 +1,4 @@
-import sys
+import sys, math
 
 # Implement a data structure that stores the most recently accessed N pages.
 # See the below test cases to see how it should work.
@@ -6,32 +6,100 @@ import sys
 # Note: Please do not use a library like collections.OrderedDict). The goal is
 #       to implement the data structure yourself!
 
+def calculate_hash(key):
+    assert type(key) == str
+    hash = 0
+    for i, x in enumerate(key):
+        hash += ord(x) * 100 ** i
+    return hash
+
+prime_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+
+def find_near_prime(num):
+    for p in prime_list:
+        if p >= num:
+            return p
+
+    for integer in range(prime_list[-1], int(num*2), 2):
+        is_prime = True
+        for prime in prime_list:
+            if prime >= math.sqrt(integer):
+                break
+            elif integer % prime == 0:
+                is_prime = False
+                break
+        if is_prime:
+            prime_list.append(integer)
+            if integer >= num:
+                return integer
+    return prime_list[-1]
+
+class Item:
+    def __init__(self, key, value, cache_next, cache_prev, item_next):
+        assert type(key) == str
+        self.key = key
+        self.value = value
+        self.cache_next = cache_next
+        self.cache_prev = cache_prev
+        self.item_next = item_next
+
 class Cache:
     # Initialize the cache.
     # |n|: The size of the cache.
     def __init__(self, n):
-        #------------------------#
-        # Write your code here!  #
-        #------------------------#
-        pass
+        self.bucket_size = 2*n
+        self.buckets = [None] * self.bucket_size
+        self.item_count = 0
+        self.cache_head = None
+        self.cache_tail = None
+        
 
     # Access a page and update the cache so that it stores the most recently
     # accessed N pages. This needs to be done with mostly O(1).
     # |url|: The accessed URL
     # |contents|: The contents of the URL
     def access_page(self, url, contents):
-        #------------------------#
-        # Write your code here!  #
-        #------------------------#
-        pass
+        assert type(url) == str
+        
+        # whileでハッシュテーブルの中にあるかどうか見るその中で以下の分岐を行う
+        
+        # if ハッシュテーブルに存在しなかったら:
+        #   self.item_count += 1
+        #   ハッシュテーブルに追加
+        #   headに追加
+        #   if item_count + 1 > bucket_size/2:
+        #       tail = self.cache_tail.prev
+        
+        # else: ハッシュテーブルに存在したら
+        #   ハッシュテーブルから削除する
+        #   item.prev.next = item.next
+        #   tmp_head = self.head
+        #   self.head = item
+        #   item.next = tmp_head
+        
+        
+        bucket_index = calculate_hash(url) % self.bucket_size
+        item = self.buckets[bucket_index]
+        while item:
+            if item.key == url:
+                item.value = contents
+                return False
+            item = item.next
+            
+        new_item = Item(url, contents, self.cache_head, None, self.buckets[bucket_index])
+        self.buckets[bucket_index] = new_item
+        self.item_count += 1
+        
 
     # Return the URLs stored in the cache. The URLs are ordered in the order
     # in which the URLs are mostly recently accessed.
     def get_pages(self):
-        #------------------------#
-        # Write your code here!  #
-        #------------------------#
-        pass
+        item = self.cache_head
+        url_list = []
+        while item:
+            url_list.append(item)
+            item = item.cache_next
+        return url_list
 
 
 def cache_test():
