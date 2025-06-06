@@ -206,3 +206,4 @@ def calculate_hash(key):
 #### 進捗
 
 作成中。
+https://github.com/shiori-1120/google_step/blob/main/week2/cache.py
