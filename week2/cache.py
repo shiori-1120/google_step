@@ -50,55 +50,63 @@ class Cache:
         self.bucket_size = 2*n
         self.buckets = [None] * self.bucket_size
         self.item_count = 0
-        self.cache_head = None
-        self.cache_tail = None
+        self.head = None
+        self.tail = None
         
 
     # Access a page and update the cache so that it stores the most recently
     # accessed N pages. This needs to be done with mostly O(1).
     # |url|: The accessed URL
     # |contents|: The contents of the URL
+    # 2回目のアクセス処理がうまくいってない
     def access_page(self, url, contents):
+        # print(url, contents)
         assert type(url) == str
-        
-        # whileでハッシュテーブルの中にあるかどうか見るその中で以下の分岐を行う
-        
-        # if ハッシュテーブルに存在しなかったら:
-        #   self.item_count += 1
-        #   ハッシュテーブルに追加
-        #   headに追加
-        #   if item_count + 1 > bucket_size/2:
-        #       tail = self.cache_tail.prev
-        
-        # else: ハッシュテーブルに存在したら
-        #   ハッシュテーブルから削除する
-        #   item.prev.next = item.next
-        #   tmp_head = self.head
-        #   self.head = item
-        #   item.next = tmp_head
-        
-        
         bucket_index = calculate_hash(url) % self.bucket_size
         item = self.buckets[bucket_index]
         while item:
             if item.key == url:
-                item.value = contents
-                return False
-            item = item.next
+                item.cache_prev = item.cache_next
+                tmp_head = self.head
+                self.head = item
+                item.cache_next = tmp_head
+                return
             
-        new_item = Item(url, contents, self.cache_head, None, self.buckets[bucket_index])
+            item = item.next
+        new_item = Item(url, contents, self.head, None, self.buckets[bucket_index])
+        # print("new item", url, contents, self.head, None, self.buckets[bucket_index])
         self.buckets[bucket_index] = new_item
-        self.item_count += 1
+        
+
+        if self.head:
+            tmp_head = self.head
+            tmp_tail = self.tail
+            
+            tmp_head.prev = new_item
+            
+            self.head = new_item
+            if self.item_count > 1:
+                self.tail = tmp_tail.cache_prev
+
+            new_item.cache_next = tmp_head
+
+        else:
+            self.head = new_item
+            self.tail = new_item
+        return
         
 
     # Return the URLs stored in the cache. The URLs are ordered in the order
     # in which the URLs are mostly recently accessed.
     def get_pages(self):
-        item = self.cache_head
+        print(self.head)
+        item = self.head
         url_list = []
         while item:
-            url_list.append(item)
+            print("item", item)
+            url_list.append(item.key)
             item = item.cache_next
+            print("url_list", url_list)
         return url_list
 
 
