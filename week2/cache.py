@@ -47,6 +47,7 @@ class Cache:
     # Initialize the cache.
     # |n|: The size of the cache.
     def __init__(self, n):
+        self.n = n
         self.bucket_size = 2*n
         self.buckets = [None] * self.bucket_size
         self.item_count = 0
@@ -58,9 +59,7 @@ class Cache:
     # accessed N pages. This needs to be done with mostly O(1).
     # |url|: The accessed URL
     # |contents|: The contents of the URL
-    # 2回目のアクセス処理がうまくいってない
     def access_page(self, url, contents):
-        # print(url, contents)
         assert type(url) == str
         bucket_index = calculate_hash(url) % self.bucket_size
         item = self.buckets[bucket_index]
@@ -68,52 +67,44 @@ class Cache:
             if item.key == url:
                 if self.head == item:
                     return
-                # elif self.tail == item:
-                #     self.tail
-                item.cache_prev.cache_next = item.cache_next
-                item.cache_next.cache_prev = item.cache_prev
-                tmp_head = self.head
-                self.head = item
-                item.cache_next = tmp_head
-                tmp_head.cache_prev = item
-                print("self.tail.value", self.tail.value)
-                tmp_tail = self.tail
-                print("tmp_tail.value", tmp_tail.value)
-                print("tmp_tail.cache_prev.value", tmp_tail.cache_prev.value)
-                self.tail = tmp_tail.cache_prev
-                # self.tail.cache_next = None
+                elif self.tail == item:
+                    self.tail = item.cache_prev
+                    self.tail.cache_next = None
+                    item.cache_next = self.head
+                    self.head = item
+                else:
+                    item.cache_prev.cache_next = item.cache_next
+                    item.cache_next.cache_prev = item.cache_prev
+                    
+                    tmp_head = self.head
+                    self.head = item
+                    self.head.cache_next = tmp_head
+                    tmp_head.cache_prev = item
+                    
                 return
             
             item = item.next
         new_item = Item(url, contents, self.head, None, self.buckets[bucket_index])
-        # print("new item", url, contents, self.head, None, self.buckets[bucket_index])
         self.buckets[bucket_index] = new_item
 
-        
-            
-        
-        if self.head:
-            tmp_head = self.head
-            # print("self.tail.value", self.tail.value)
-            tmp_tail = self.tail
-            
-            self.head.cache_prev = new_item
-            # print("tmp_head.value", tmp_head.value)
-            # print("↓")
-            # print("tmp_head.prev.value", tmp_head.cache_prev.value)
-            self.head = new_item
-
-            new_item.cache_next = tmp_head
-            if self.item_count == self.bucket_size//2:
-                self.tail = tmp_tail.cache_prev
-                self.tail.cache_next = None
-            else:
-                self.item_count += 1
-                # print("self.item_count", self.item_count)
-
-        else:
+        if self.item_count == 0:
+            self.item_count += 1
             self.head = new_item
             self.tail = new_item
+            
+        elif 0 < self.item_count < 4:
+            self.item_count += 1
+            tmp_head = self.head
+            self.head = new_item
+            tmp_head.cache_prev = new_item
+            
+        elif self.item_count == 4:
+            tmp_head = self.head
+            self.head = new_item
+            tmp_head.cache_prev = new_item
+            self.tail = self.tail.cache_prev
+            self.tail.cache_next = None
+            
         return
         
 
@@ -127,7 +118,6 @@ class Cache:
             # print("item", item)
             url_list.append(item.key)
             item = item.cache_next
-        print("url_list", url_list)
         return url_list
 
 
@@ -172,7 +162,6 @@ def cache_test():
     # The cache is updated to:
     #   (most recently accessed)<-- "a.com", "d.com", "c.com", "b.com" -->(least recently accessed)
     assert cache.get_pages() == ["a.com", "d.com", "c.com", "b.com"]
-    print("access C")
     cache.access_page("c.com", "CCC")
     assert cache.get_pages() == ["c.com", "a.com", "d.com", "b.com"]
     cache.access_page("a.com", "AAA")
@@ -181,7 +170,6 @@ def cache_test():
     assert cache.get_pages() == ["a.com", "c.com", "d.com", "b.com"]
 
     # Access "e.com".
-    print("here")
     cache.access_page("e.com", "EEE")
     # The cache is full, so we need to remove the least recently accessed page "b.com".
     # The cache is updated to:
