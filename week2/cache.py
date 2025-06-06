@@ -111,11 +111,9 @@ class Cache:
     # Return the URLs stored in the cache. The URLs are ordered in the order
     # in which the URLs are mostly recently accessed.
     def get_pages(self):
-        # print(self.head)
         item = self.head
         url_list = []
         while item:
-            # print("item", item)
             url_list.append(item.key)
             item = item.cache_next
         return url_list
