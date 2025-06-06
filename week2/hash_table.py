@@ -1,4 +1,4 @@
-import random, sys, time
+import random, sys, time, math
 
 ###########################################################################
 #                                                                         #
@@ -17,35 +17,34 @@ def calculate_hash(key):
     assert type(key) == str
     # Note: This is not a good hash function. Do you see why?
     hash = 0
-    for i in key:
-        hash += ord(i)
+    for i, x in enumerate(key):
+        hash += ord(x) * 100 ** i
     return hash
 
-def generate_prime(num):
-    if num == 1:
-        return 1
-    prime_list = [2]
-    for i in range(num + 1):
-        for prime in prime_list:
-            if i % prime == 0:
-                break
-        else:
-            prime_list.append(i)
-    return prime_list[-1] 
+prime_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
 
-def expand_or_shrink_hash(self, is_expand):
-    if is_expand:
-        new_bucket_size = generate_prime(self.bucket_size*2)
-    else:
-        new_bucket_size = generate_prime(self.bucket_size//2)
-    new_hash_table = HashTable(bucket_size = new_bucket_size)
+def find_near_prime(num):
+    for p in prime_list:
+        if p >= num:
+            return p
+
+    for integer in range(prime_list[-1], int(num*2), 2):
+        is_prime = True
+        for prime in prime_list:
+            if prime >= math.sqrt(integer):
+                break
+            elif integer % prime == 0:
+                is_prime = False
+                break
+        if is_prime:
+            prime_list.append(integer)
+            if integer >= num:
+                return integer
+    return prime_list[-1]
     
-    for bucket in new_hash_table.buckets:
-        while bucket:
-            new_hash_table.put(bucket.key, bucket.value)
-            bucket = bucket.next
     
-    return new_hash_table
+def return_new_hash_table(new_bucket_size):
+    return HashTable(bucket_size = new_bucket_size)
 
 # An item object that represents one key - value pair in the hash table.
 class Item:
@@ -76,7 +75,8 @@ class HashTable:
         self.bucket_size = bucket_size
         self.buckets = [None] * self.bucket_size
         self.item_count = 0
-
+    
+    
     # Put an item to the hash table. If the key already exists, the
     # corresponding value is updated to a new value.
     #
@@ -94,11 +94,15 @@ class HashTable:
                 item.value = value
                 return False
             item = item.next
+            
         new_item = Item(key, value, self.buckets[bucket_index])
         self.buckets[bucket_index] = new_item
         self.item_count += 1
-        if self.item_count // self.bucket_size > 0.7:
-            self = expand_or_shrink_hash(self, True)
+        
+        if  self.item_count > self.bucket_size * 0.7:
+            new_bucket_size = find_near_prime(self.bucket_size*2)
+            self.rehash(new_bucket_size)
+
         return True
 
     # Get an item from the hash table.
@@ -127,21 +131,42 @@ class HashTable:
         self.check_size() # Note: Don't remove this code.
         bucket_index = calculate_hash(key) % self.bucket_size
         item = self.buckets[bucket_index]
+        prev_item = None
         while item:
             if item.key == key:
-                if item.next:
-                    item.value = item.next
+                if prev_item:
+                    prev_item.next = item.next
                 else:
-                    item.key = None
-                    item.value = None
+                    self.buckets[bucket_index] = item.next
+                    
                 self.item_count -= 1
                 
-                if self.item_count // self.bucket_size < 0.3:
-                    self = expand_or_shrink_hash(self, False)
+                if self.item_count < self.bucket_size * 0.3 and self.bucket_size >97:
+                    new_bucket_size = find_near_prime(self.bucket_size//2)
+                    self.rehash(new_bucket_size)
                 return True
+            prev_item = item
             item = item.next
             
         return False
+
+    def rehash(self, new_bucket_size):
+        new_buckets = [None] * new_bucket_size
+        
+        for bucket in self.buckets:
+            item = bucket
+            while item:
+                next_item = item.next
+                
+                new_bucket_index = calculate_hash(item.key) % new_bucket_size
+                
+                item.next = new_buckets[new_bucket_index]
+                new_buckets[new_bucket_index] = item
+                
+                item = next_item
+            
+        self.buckets = new_buckets
+        self.bucket_size = new_bucket_size
 
     # Return the total number of items in the hash table.
     def size(self):
@@ -232,8 +257,9 @@ def functional_test():
 # table when the number of items in the hash table hits some threshold) and
 # 2) tweak the hash function (Hint: think about ways to reduce hash conflicts).
 def performance_test():
+    
     hash_table = HashTable()
-
+    performance_test_begin = time.time()
     for iteration in range(100):
         begin = time.time()
         random.seed(iteration)
@@ -254,9 +280,12 @@ def performance_test():
             hash_table.delete(str(rand))
 
     assert hash_table.size() == 0
+    performance_test_end = time.time()
+    total_time = performance_test_end - performance_test_begin
+    print("total_time", total_time)
     print("Performance tests passed!")
 
 
 if __name__ == "__main__":
     functional_test()
-    # performance_test()
+    performance_test()
