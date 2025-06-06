@@ -51,8 +51,8 @@ https://github.com/shiori-1120/google_step/blob/main/week2/hash_table.py
 
 #### 実装状況
 
-要素数がテーブルサイズの 70% を超えた場合の拡張処理
-また、テーブルサイズは元のサイズの2倍に近い素数を用いた
+要素数がテーブルサイズの 70% を超えた場合の拡張処理。
+また、テーブルサイズは元のサイズの2倍に近い素数を用いた。
 
 ```python
         if  self.item_count > self.bucket_size * 0.7:
@@ -68,8 +68,8 @@ https://github.com/shiori-1120/google_step/blob/main/week2/hash_table.py
 
 #### 実装状況
 
-要素数がテーブルサイズの 30% を下回った場合の縮小処理
-拡張処理と同様に、テーブルサイズは元のサイズの2倍に近い素数を用いた
+要素数がテーブルサイズの 30% を下回った場合の縮小処理。
+拡張処理と同様に、テーブルサイズは元のサイズの2倍に近い素数を用いた。
 
 ```python
                 if self.item_count < self.bucket_size * 0.3 and self.bucket_size >97:
