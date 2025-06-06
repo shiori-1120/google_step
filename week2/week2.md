@@ -4,14 +4,9 @@
 
 **目標:** `delete(key)` を実装し、`functional_test()` が合格するようなハッシュテーブルを実装してください。
 
-### ヒント 1
-
-* `delete(key)` を実装してください。
-* `functional_test()` が通れば合格です。
-
----
-
 #### 実装状況
+
+https://github.com/shiori-1120/google_step/blob/main/week2/hash_table.py
 
 `delete(key)` の実装が完了し、`functional_test()` に合格した。
 
