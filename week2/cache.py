@@ -66,29 +66,50 @@ class Cache:
         item = self.buckets[bucket_index]
         while item:
             if item.key == url:
-                item.cache_prev = item.cache_next
+                if self.head == item:
+                    return
+                # elif self.tail == item:
+                #     self.tail
+                item.cache_prev.cache_next = item.cache_next
+                item.cache_next.cache_prev = item.cache_prev
                 tmp_head = self.head
                 self.head = item
                 item.cache_next = tmp_head
+                tmp_head.cache_prev = item
+                print("self.tail.value", self.tail.value)
+                tmp_tail = self.tail
+                print("tmp_tail.value", tmp_tail.value)
+                print("tmp_tail.cache_prev.value", tmp_tail.cache_prev.value)
+                self.tail = tmp_tail.cache_prev
+                # self.tail.cache_next = None
                 return
             
             item = item.next
         new_item = Item(url, contents, self.head, None, self.buckets[bucket_index])
         # print("new item", url, contents, self.head, None, self.buckets[bucket_index])
         self.buckets[bucket_index] = new_item
-        
 
+        
+            
+        
         if self.head:
             tmp_head = self.head
+            # print("self.tail.value", self.tail.value)
             tmp_tail = self.tail
             
-            tmp_head.prev = new_item
-            
+            self.head.cache_prev = new_item
+            # print("tmp_head.value", tmp_head.value)
+            # print("↓")
+            # print("tmp_head.prev.value", tmp_head.cache_prev.value)
             self.head = new_item
-            if self.item_count > 1:
-                self.tail = tmp_tail.cache_prev
 
             new_item.cache_next = tmp_head
+            if self.item_count == self.bucket_size//2:
+                self.tail = tmp_tail.cache_prev
+                self.tail.cache_next = None
+            else:
+                self.item_count += 1
+                # print("self.item_count", self.item_count)
 
         else:
             self.head = new_item
@@ -99,14 +120,14 @@ class Cache:
     # Return the URLs stored in the cache. The URLs are ordered in the order
     # in which the URLs are mostly recently accessed.
     def get_pages(self):
-        print(self.head)
+        # print(self.head)
         item = self.head
         url_list = []
         while item:
-            print("item", item)
+            # print("item", item)
             url_list.append(item.key)
             item = item.cache_next
-            print("url_list", url_list)
+        print("url_list", url_list)
         return url_list
 
 
@@ -151,7 +172,7 @@ def cache_test():
     # The cache is updated to:
     #   (most recently accessed)<-- "a.com", "d.com", "c.com", "b.com" -->(least recently accessed)
     assert cache.get_pages() == ["a.com", "d.com", "c.com", "b.com"]
-
+    print("access C")
     cache.access_page("c.com", "CCC")
     assert cache.get_pages() == ["c.com", "a.com", "d.com", "b.com"]
     cache.access_page("a.com", "AAA")
@@ -160,6 +181,7 @@ def cache_test():
     assert cache.get_pages() == ["a.com", "c.com", "d.com", "b.com"]
 
     # Access "e.com".
+    print("here")
     cache.access_page("e.com", "EEE")
     # The cache is full, so we need to remove the least recently accessed page "b.com".
     # The cache is updated to:
