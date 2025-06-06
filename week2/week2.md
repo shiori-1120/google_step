@@ -161,10 +161,11 @@ def calculate_hash(key):
 * 再ハッシュ中はデータへのアクセスができなくなってしまう。
 * 木構造のほうがデータ同士の関連性を保持しやすい。
 * ハッシュテーブルでは範囲検索などが難しい。
+  
+**??**
 
-
-* jsonってハッシュテーブルと似た構造？？
-* firebaseのDBとかはcollection内のdocumentは(document IDをもとに)木構造で管理して、その中のfieldをハッシュテーブル的な感じで管理している？？
+-  jsonってハッシュテーブルと似た構造？？
+-  firebaseのDBとかはcollection内のdocumentは(document IDをもとに)木構造で管理して、その中のfieldをハッシュテーブル的な感じで管理している？？
 
 
 ## Extra 1: 常に O(1) での操作が可能なデータ構造
