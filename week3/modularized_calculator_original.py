@@ -127,14 +127,12 @@ def evaluate(tokens):
     answer = 0
     index = 1
     while index < len(tokens):
-        # print(tokens[index])
         if tokens[index]['type'] == 'NUMBER':
             if tokens[index - 1]['type'] == 'PLUS':
                 answer += tokens[index]['number']
             elif tokens[index - 1]['type'] == 'MINUS':
                 answer -= tokens[index]['number']
             else:
-                # print(tokens[index])
                 print('Invalid syntax')
         index += 1
     return answer
