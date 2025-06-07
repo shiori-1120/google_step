@@ -10,6 +10,18 @@
 不正な入力はないものと仮定して構いません。
 細かい仕様は自由に定義してください。
 
+**全体の前提**
+* 数式として成り立たない入力はない
+(e.g.) ~~1/0~~
+* かっこの数はそろっている
+(e.g.) ~~(1+((3+4+5)~~
+* `+`, `-`, `*`, `/`, `abs()`, `int()`, `round()`以外の演算子等は入力されない
+* かっこの中の処理がない式は入力されない
+* 数字だけの入力はない
+* 不要なかっこが存在しない
+(e.g.) ~~((1+2))~~, ~~(1)~~
+* 入力に空白な詩
+
 ---
 
 ### 実装
@@ -39,18 +51,35 @@ evaluate(tokens)関数内に以下の処理を追加
 ```
 
 ```
+    tmp_res = 0
+    # 掛け算・割り算を計算
     while index < len(tokens):
         if tokens[index]['type'] == 'NUMBER':
             if index + 1 < len(tokens):
+                # かけ算
                 if tokens[index + 1]['type'] == 'TIMES':
-                    tmp_res = tokens[index]['number'] * tokens[index + 2]['number']
-                    del tokens[index: index + 3]
+                    # かける数の正負による分岐
+                    if tokens[index + 2]['type'] == 'NUMBER':
+                        tmp_res = tokens[index]['number'] * tokens[index + 2]['number']
+                        del tokens[index: index + 3]
+                    elif tokens[index + 2]['type'] == 'MINUS':
+                        tmp_res = tokens[index]['number'] * (-tokens[index + 3]['number'])
+                        del tokens[index: index + 4]
+                        
                     tokens.insert(index, {'type': 'NUMBER', 'number': tmp_res})
+                    index -= 1
+                # わり算
                 elif tokens[index + 1]['type'] == 'DEVIDED':
-                    tmp_res = tokens[index]['number'] / tokens[index + 2]['number']
-                    del tokens[index: index + 3]
+                    # かける数の正負による分岐
+                    if tokens[index + 2]['type'] == 'NUMBER':
+                        tmp_res = tokens[index]['number'] / tokens[index + 2]['number']
+                        del tokens[index: index + 3]
+                    elif tokens[index + 2]['type'] == 'MINUS':
+                        tmp_res = tokens[index]['number'] / (-tokens[index + 3]['number'])
+                        del tokens[index: index + 4]
+                        
                     tokens.insert(index, {'type': 'NUMBER', 'number': tmp_res})
-        
+                    index -= 1
         index += 1
 
     index = 1 # 足し算・引き算のためにindexを初期化
@@ -63,6 +92,21 @@ evaluate(tokens)関数内に以下の処理を追加
 作成したプログラムが正しく動作することを確認するため、**テストケース**を追加してください。できるだけ網羅的にテストケースを作成しましょう。
 
 ### テストケース
+* 1*1 # 簡単なテストケース
+* 1*0 # ゼロがあるときの演算
+* 0*0 # 両方ゼロの時
+* 0.00000000*0.00000000 # たくさんのゼロの時
+* 99999999999999999999999999*99999999999999999999999 # 大きい数の時
+* 12345*67890 # 0~9をすべて使ってみる
+* 1.23*4.56 # 小数のかけ算
+* 0.01*0.03 # 一桁目が0の小数同士のかけ算
+* 1/6 # わり算
+* 1/3 # 割り切れないわり算
+* 0.1/0.4 # 小数同士の割り算
+* 1*3*4*5*2 # *を繰り返す
+* 1*2/3*4/5 # /と*を繰り返す
+* 1/2/3 # /を繰り返す
+* 1*-2
 
 # TODO: テストケースの追加
 
@@ -139,6 +183,13 @@ tokenize(line)関数内
 
 ### テストケース
 
+* (1+1) # もっとも簡単なテストケース
+* (3*4)+(1-2) # かっこの計算をつなげたもの
+* (((1+1)+1)+1)+1 # かっこの中にかっこがあるもの
+* (1/1)/1 # かっこの計算にわり算
+* (1+1)-1 # かっこの計算に引き算
+* (1+1)*4 # かっこの計算にかけ算
+
 ---
 
 ## 宿題 4: 関数への対応
@@ -180,7 +231,7 @@ def evaluate_parentheses(tokens):
             if tokens[index]['type'] == 'LEFT_BRACKET':
                 tmp_res = evaluate(tokens[index+1: right_bracket_index])
             elif tokens[index]['type'] == 'ABS':
-                tmp_res = abs(int(evaluate(tokens[index+1: right_bracket_index])))
+                tmp_res = abs(evaluate(tokens[index+1: right_bracket_index]))
             elif tokens[index]['type'] == 'INT':
                 tmp_res = int(evaluate(tokens[index+1: right_bracket_index]))
             elif tokens[index]['type'] == 'ROUND':
@@ -219,5 +270,11 @@ def read_round(line, index):
 
 ### テストケース
 
-
-
+* abs(-6.78) 
+* int(0)
+* int(1.11111111111111)
+* round(5.678)
+* round(0)
+* round(3)
+* round(1*4/3+2-9)
+* abs(int(round(-9)))
