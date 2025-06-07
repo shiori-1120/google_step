@@ -4,7 +4,6 @@ def read_number(line, index):
     number = 0
     while index < len(line) and line[index].isdigit():
         number = number * 10 + int(line[index])
-        # print('line[index]', line[index])
         index += 1
     if index < len(line):
         if line[index] == '.':
@@ -14,7 +13,6 @@ def read_number(line, index):
                 number =  int(line[index]) * (0.1 ** multiplier_number) + number
                 multiplier_number += 1
                 index += 1
-    # print("number", number)
     token = {'type': 'NUMBER', 'number': number}
     return token, index
 
@@ -71,10 +69,7 @@ def tokenize(line):
             (token, index) = read_times(line, index)
         elif line[index] == '/':
             (token, index) = read_devided(line, index)
-        elif line[index] == '(':
-            (token, index) = read_left_bracket(line, index)
-        elif line[index] == ')':
-            (token, index) = read_right_bracket(line, index)
+
         elif line[index] == 'a':
             (token, index) = read_abs(line, index)
         elif line[index] == 'i':
@@ -94,7 +89,7 @@ def evaluate(tokens):
     tokens.insert(0, {'type': 'PLUS'}) # Insert a dummy '+' token
     index = 1
     
-    # 掛け算割り算を計算
+    # 掛け算・割り算を計算
     while index < len(tokens):
         if tokens[index]['type'] == 'NUMBER':
             if index + 1 < len(tokens):
@@ -156,7 +151,6 @@ def evaluate_parentheses(tokens):
 def test(line):
     tokens = tokenize(line)
     simplified_tokens = evaluate_parentheses(tokens)
-    print(simplified_tokens)
     actual_answer = evaluate(simplified_tokens)
     expected_answer = eval(line)
     if abs(actual_answer - expected_answer) < 1e-8:
