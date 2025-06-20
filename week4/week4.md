@@ -286,6 +286,12 @@ Wikipediaのグラフにおいて「渋谷」から「池袋」まで、同じ�
 
 最初にBFSのように振る舞うとき、最初の1つだけ別のスタックに、残りを同じスタックに積む。最初の1つだけを入れるスタックには最大で1つしか入れない。
 
+？？？？
+
+stack1ってstackじゃなくてもいい？？？
+
+結局最初にB, E, Gを見つけているのは変わらない？？（出力は違うけど）
+
 ```python
 def dfs_with_stack_in_the_recursion_order(start, goal):
     print("dfs_with_stack_in_the_recursion_order:")
