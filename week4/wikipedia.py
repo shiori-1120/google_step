@@ -1,10 +1,11 @@
 import sys
 import collections
+import codecs
 
 class Wikipedia:
 
     # Initialize the graph of pages.
-    def __init__(self, pages_file, links_file):
+    def __init__(self, pages_file, links_file, path_file):
 
         # A mapping from a page ID (integer) to the page title.
         # For example, self.titles[1234] returns the title of the page whose
@@ -15,6 +16,8 @@ class Wikipedia:
         # For example, self.links[1234] returns an array of page IDs linked
         # from the page whose ID is 1234.
         self.links = {}
+        
+        self.longest_path = []
 
         # Read the pages file into self.titles.
         with open(pages_file, encoding="utf-8") as file:
@@ -36,6 +39,14 @@ class Wikipedia:
                 self.links[src].append(dst)
         print("Finished reading %s" % links_file)
         print()
+        
+        # Read the path file into self.titles.
+        with open(path_file, encoding="utf-8") as file:
+            for id in file:
+                id = int(id)
+                self.longest_path.append(self.titles[id])
+        print(*self.longest_path, sep="\n", file=codecs.open('title_path.txt', 'w', 'utf-8'))
+        print("Finished reading %s" % path_file)
 
 
     # Example: Find the longest titles.
@@ -249,8 +260,8 @@ class Wikipedia:
             current_path_length = len(id_longest_path)
             print('Length', current_path_length)
             
+            count = 0
             for i in range(current_path_length - 1):
-                count = 0
                 for j in range(i + 1, current_path_length):
                     
                     # 探索時に避けるべきノードのセット
@@ -261,12 +272,10 @@ class Wikipedia:
                         id_longest_path = id_longest_path[:i] + tmp_path + id_longest_path[j+1:] 
                         path_updated = True
                         print('Length', len(id_longest_path)) 
-                        count = 0 
-                    else:
                         count += 1
-                        if count == 10:
-                            break
-                        print('else', j - i + 1, count)   
+                        if count % 10 == 0:
+                            print(*id_longest_path, sep="\n", file=codecs.open('path.txt', 'w', 'utf-8'))
+                        break
 
             if not path_updated:
                 # ある程度、新しい経路が見つからなかったらループを抜ける
@@ -277,7 +286,7 @@ class Wikipedia:
         print('Final longest path length:', len(final_title_path))
         return final_title_path
 
-        # longest path 311238
+        # longest path 313811
 
 
     def id_to_title_path(self, id_path):
@@ -318,11 +327,11 @@ class Wikipedia:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         print("usage: %s pages_file links_file" % sys.argv[0])
         exit(1)
 
-    wikipedia = Wikipedia(sys.argv[1], sys.argv[2])
+    wikipedia = Wikipedia(sys.argv[1], sys.argv[2], sys.argv[3])
     # Example
     # wikipedia.find_longest_titles()
 
@@ -341,6 +350,6 @@ if __name__ == "__main__":
     # wikipedia.find_most_popular_pages()
 
     # Homework #3 (optional)
-    wikipedia.find_longest_path("渋谷", "池袋")
-    # wikipedia.find_longest_path("A", "F")
+    # wikipedia.find_longest_path("渋谷", "池袋")
+    wikipedia.find_longest_path("A", "F")
     

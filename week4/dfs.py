@@ -82,17 +82,15 @@ def dfs_with_stack(start, goal):
 # finds A -> B -> C -> D -> E -> F first using a stack.
 def dfs_with_stack_in_the_recursion_order(start, goal):
     print("dfs_with_stack_in_the_recursion_order:")
-    stack1 = collections.deque()
-    stack2 = collections.deque()
-    visited = {}
-    previous = {}
-    first = True
+    stack1, stack2 = collections.deque(), collections.deque()
+    visited, previous = {}, {}
 
     stack1.append(start)
-    visited[start] = True
-    previous[start] = None
+    visited[start], previous[start] = True, None
+    
     node = start
     while stack1 or stack2:
+        first = True
         if stack1:
             node = stack1.pop()
         else:
@@ -110,7 +108,6 @@ def dfs_with_stack_in_the_recursion_order(start, goal):
                     stack2.append(child)
                     previous[child] = node
         
-
     if goal in previous:
         print(" -> ".join(find_path(goal, previous)))
     else:
