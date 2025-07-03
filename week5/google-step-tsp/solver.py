@@ -68,7 +68,7 @@ def random_two_opt(tour, dist):
     N = len(tour)
     new_tour = tour
     count = 0
-    while not count > 1e10:
+    while not count > 5e9:
         # ランダムに二つ選ぶ
         # 0 ~ len(tour)-1 最初から最後まで
         i_1 = random.randint(0, len(tour)-1)
@@ -92,7 +92,8 @@ def random_two_opt(tour, dist):
         # 入れ替えた時に距離が短くなるなら入れ替える
         if curr_dist > update_dist:
             new_tour[i_2:j_2] = new_tour[i_2:j_2][::-1]
-            print("距離",calculate_cost(new_tour, dist), 'rondom')
+        if count%5e6 == 0:
+            print("距離",calculate_cost(new_tour, dist), 'rondom', count)
         count += 1
     
     return new_tour
