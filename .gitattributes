@@ -1,0 +1,5 @@
+*.txt filter=lfs diff=lfs merge=lfs -text
+"week4/links_medium.txt" filter=lfs diff=lfs merge=lfs -text
+"week4/pages_large.txt" filter=lfs diff=lfs merge=lfs -text
+"week4/links_large.txt" filter=lfs diff=lfs merge=lfs -text
+"*.txt" filter=lfs diff=lfs merge=lfs -text

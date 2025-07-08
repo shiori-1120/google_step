@@ -100,6 +100,7 @@ def dfs_with_stack_in_the_recursion_order(start, goal):
         for child in links[node]:
             if not child in visited:
                 if first:
+                    print('here')
                     stack1.append(child)
                     first = False
                     visited[child] = True
