@@ -77,16 +77,30 @@ void my_initialize() {
 void *my_malloc(size_t size) {
   my_metadata_t *metadata = my_heap.free_head;
   my_metadata_t *prev = NULL;
+  my_metadata_t *best_fit_metadata = NULL;
+  my_metadata_t *best_fit_metadata_prev = NULL;
+  size_t best_fit_size = (size_t)-1;
+  // size_t best_fit_size = (size_t)-1;
   // First-fit: Find the first free slot the object fits.
   // TODO: Update this logic to Best-fit!
-  while (metadata && metadata->size < size) {
+ 
+  while (metadata) {
+    if (size <= metadata->size && size < best_fit_size) {
+      best_fit_metadata = metadata;
+      best_fit_metadata_prev = prev;
+      best_fit_size = metadata->size - size;
+      if (size == metadata->size) {
+        break;
+      }
+    } 
     prev = metadata;
     metadata = metadata->next;
   }
+
   // now, metadata points to the first free slot
   // and prev is the previous entry.
 
-  if (!metadata) {
+  if (!best_fit_metadata) {
     // There was no free slot available. We need to request a new memory region
     // from the system by calling mmap_from_system().
     //
@@ -110,10 +124,10 @@ void *my_malloc(size_t size) {
   // ... | metadata | object | ...
   //     ^          ^
   //     metadata   ptr
-  void *ptr = metadata + 1;
-  size_t remaining_size = metadata->size - size;
+  void *ptr = best_fit_metadata + 1;
+  size_t remaining_size = best_fit_metadata->size - size;
   // Remove the free slot from the free list.
-  my_remove_from_free_list(metadata, prev);
+  my_remove_from_free_list(best_fit_metadata, best_fit_metadata_prev);
 
   if (remaining_size > sizeof(my_metadata_t)) {
     // Shrink the metadata for the allocated object
@@ -121,7 +135,7 @@ void *my_malloc(size_t size) {
     // If the remaining_size is not large enough to make a new metadata,
     // this code path will not be taken and the region will be managed
     // as a part of the allocated object.
-    metadata->size = size;
+    best_fit_metadata->size = size;
     // Create a new metadata for the remaining free slot.
     //
     // ... | metadata | object | metadata | free slot | ...
